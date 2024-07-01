@@ -1,0 +1,8 @@
+.list{
+    width: 200px;
+    position: absolute !important;
+}
+
+.hidden{
+    display: none;
+}
