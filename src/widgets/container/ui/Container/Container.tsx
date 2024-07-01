@@ -1,11 +1,11 @@
 import { IFile } from "../../../../entities/file";
 import { Folder, IFolder } from "../../../../entities/folder";
-import { ContainerChildrenTypes } from "../../model/types";
+import { ChildrenType } from "../../../../shared/model/types";
 
 interface Props{
     header: string;
     children?: IFile[] | IFolder[];
-    type: ContainerChildrenTypes;
+    type: ChildrenType;
 }
 
 export const Container = ({header, children, type}: Props) => {

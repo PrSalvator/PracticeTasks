@@ -26,7 +26,7 @@ export const MainContainer = () => {
     }, [])
 
     return (
-        <div className="row col-8 offset-2 border rounded-3 px-4 py-3 mt-4">
+        <div className="row col-8 offset-2 border rounded-3 px-4 py-3">
             <div className="mb-3">
                 <Container header="Folders" children={folders} type="folder"/>
             </div>

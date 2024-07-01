@@ -1,9 +1,9 @@
-import { MainContainer } from "../../../widgets/container"
+import { Container } from "../../../widgets/container"
 
 export const Page = () => {
     return (
         <div>
-            <MainContainer/>
+            <Container/>
         </div>
     )
 }

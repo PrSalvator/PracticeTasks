@@ -1,11 +1,11 @@
-import {axios} from "../../../shared/api/index"
+import {instance} from "../../../shared/api/instance"
 
 const SLUG = 'drive/folder/';
 
 export async function getFolder(id = 'root'){
-    return await axios.get(`${SLUG}${id}`)
+    return await instance.get(`${SLUG}${id}`)
 }
 
 export async function createFolder(name: string, parentId = 'root') {
-    return await axios.post(SLUG, {parentId, name})
+    return await instance.post(SLUG, {parentId, name})
 }
