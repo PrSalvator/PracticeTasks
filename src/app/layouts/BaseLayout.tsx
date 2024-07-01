@@ -1,10 +1,14 @@
 import { Outlet } from "react-router-dom"
 import { Header } from "../../widgets/header/ui"
-import { useAuth } from "../providers/AuthProvider/hooks/useAuth";
 import { AuthContext } from "../providers/AuthProvider/context/authContext";
+import { useEffect, useState } from "react";
+import { IUser } from "../../entities/user";
 
 export const BaseLayout = () => {
-    const { user, login, logout, setUser } = useAuth();
+    const [user, setUser] = useState<IUser | null>(null);
+    useEffect(() => {
+        setUser(user);
+    }, [user])
 
     return (
         <AuthContext.Provider value={{user, setUser}}>
