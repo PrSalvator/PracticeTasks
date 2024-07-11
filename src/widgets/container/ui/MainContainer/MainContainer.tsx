@@ -1,37 +1,120 @@
+import { Folder, IFolder, ResponseFolder, UpdateFolder } from "../../../../entities/folder";
+import { IFile, File } from "../../../../entities/file";
 import { useEffect, useState } from "react";
-import { IFile } from "../../../../entities/file";
-import { GetFolder, IFolder, ResponseFolder } from "../../../../entities/folder";
-import { Container } from "../Container/Container";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Alert, AlertColor, Snackbar } from "@mui/material";
 
-export const MainContainer = () => {
+interface Props{
+    folder?: ResponseFolder;
+    setFolder: React.Dispatch<React.SetStateAction<ResponseFolder | undefined>>; 
+    selectedValue?: IFile | IFolder;
+    setSelectedValue: React.Dispatch<React.SetStateAction<IFolder | IFile | undefined>>; 
+}
+
+export const MainContainer = ({folder, setSelectedValue, selectedValue, setFolder}: Props) => {
+    const [movedFolder, setMovedFolder] = useState<IFolder | undefined>(undefined);
     const [folders, setFolders] = useState<IFolder[] | undefined>(undefined);
     const [files, setFiles] = useState<IFile[] | undefined>(undefined);
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const parentFolder = getParentFolder();
+    const [openAlert, setOpenAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertSeverity, setAlertSeverity] = useState<AlertColor>('success')
 
     useEffect(() => {
-        GetFolder().then(function (response){
-            const folder = response.data.data as ResponseFolder;
-            setFiles(folder.children.filter((children) => children.type == 'file').map((childrenFile) => {
-                return childrenFile.file!;
-            }))
-            setFolders(folder.children.filter((children) => children.type == 'folder').map((childrenFolder) => {
-                return {
-                    id: childrenFolder.id,
-                    name: childrenFolder.name
-                };
-            }))
-        }).catch(function (error){
-            console.log(error);
-        })
-        
-    }, [])
+        if(folder){
+            const folders: IFolder[] = [];
+            const files: IFile[] = [];
+            folder.children.forEach(item => {
+                if(item.type === 'folder') folders.push({id: item.id, name: item.name});
+                if(item.type === 'file') files.push({id: item.id, name: item.file!.name, filePath: item.file!.filepath});
+            })
+            setFolders(folders);
+            setFiles(files);
+        }
+    }, [folder])
+
+    function getParentFolder(): IFolder | undefined{
+        const parentId = searchParams.get("parentId");
+        if(parentId){
+            return {id: parentId, name: "..."};
+        }
+        return undefined;
+    }
+
+    function handleDoubleClick(selectedFolder: IFolder){
+        navigate(`/${selectedFolder.id}?parentId=${folder?.id}`);
+
+    }
+
+    function dragStartHandler(folder: IFolder){
+        setMovedFolder(folder);
+    }
+
+    function dropHandler(folder: IFolder){
+        if(movedFolder && folder.id !== movedFolder.id){
+            showAlert("Mooving", 'info');
+            UpdateFolder(movedFolder, folder.id).then(() => {
+                showAlert("Folder successfully moved", 'success');
+                deleteFolder(movedFolder);
+                setSelectedValue(undefined);
+            }, () => {
+                showAlert("Folder cannot moved", 'error');
+            })
+        }
+    }
+
+    function deleteFolder(folder: IFolder){
+        setFolder((prev) => {
+            const index = prev?.children.indexOf(prev?.children.find(x => x.id === folder.id)!);
+            if(index !== undefined) prev?.children.splice(index, 1);
+            return {...prev!};
+        });
+    }
+
+    function dragOverHandler(e :React.DragEvent<HTMLDivElement>){
+        e.preventDefault();
+    }
+
+    function showAlert(message: string, severity: AlertColor){
+        setAlertMessage(message);
+        setAlertSeverity(severity);
+        setOpenAlert(true);
+    }
 
     return (
-        <div className="row col-8 offset-2 border rounded-3 px-4 py-3">
-            <div className="mb-3">
-                <Container header="Folders" children={folders} type="folder"/>
+        <div className="border rounded-3 px-4 py-3">
+            <Snackbar autoHideDuration={3000} open={openAlert} onClose={() => setOpenAlert(false)}>
+                <Alert onClose={() => setOpenAlert(false)} severity={alertSeverity} variant="filled">{alertMessage}</Alert>
+            </Snackbar>
+            <h2 className="mb-3">{folder?.name}</h2>
+            <h5>Folders</h5>
+            <div className="mb-3 row row-cols-auto g-2">
+                {parentFolder && (
+                    <Folder
+                    onDragOver={dragOverHandler} 
+                    onDrop={() => dropHandler(parentFolder)} 
+                    folder={parentFolder} onDoubleClick={() => navigate(-1)}/>
+                )}
+                {folders && (    
+                    folders.map((folder, index) => 
+                        <Folder
+                        onDragOver={dragOverHandler} 
+                        onDoubleClick={() => handleDoubleClick(folder)} key={index}
+                        onClick={() => setSelectedValue(folder)} 
+                        isSelected={selectedValue?.id == folder.id} folder={folder}
+                        onDrop={() => dropHandler(folder)} onDragStart={() => dragStartHandler(folder)}/>
+                    )
+                )}
             </div>
-            <div>
-                <Container header="Files" children={files} type="file"/>
+            <h5>Files</h5>
+            <div className="mb-3 row row-cols-auto g-2">
+                {files && (
+                    files.map((file, index) =>
+                        <File onClick={() => setSelectedValue(file)} file={file} isSelected={selectedValue?.id == file.id} key={index}/>
+                    )
+                )}
             </div>
         </div>
     )

@@ -90,7 +90,7 @@ export const Page = () => {
                         label="Password"
                         />
                 </FormControl>
-                <SpinButton isLoading={isLoading} type="submit">log in</SpinButton>
+                <SpinButton className="p-0 mt-3" type="submit" isLoading={isLoading} variant="contained">log in</SpinButton>
                 <p className="p-0 mt-2 mb-0">Don`t you have an account? <Link href="register" underline="none">Register</Link></p>
                 <Snackbar anchorOrigin={{vertical:"bottom", horizontal:"center"}} open={open} autoHideDuration={3000} onClose={handelCloseAlert}>
                     <Alert variant="filled" severity='error'>

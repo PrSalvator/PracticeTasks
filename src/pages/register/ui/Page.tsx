@@ -57,7 +57,7 @@ export const Page = () => {
                 <h3 className="text-center mb-3">Register</h3>
                 <TextField onChange={onLoginChange} required name="login" label="Login"></TextField>
                 <TextField onChange={onPasswordChange} required name="password" className="mt-3" label="Password"></TextField>
-                <SpinButton type='submit' isLoading={isLoading}>register</SpinButton>
+                <SpinButton className="p-0 mt-3" type="submit" isLoading={isLoading} variant="contained">register</SpinButton>
                 <p className="p-0 mt-2 mb-0">Already have an account? <Link href="login" underline="none">Login</Link></p>
                 <Snackbar anchorOrigin={{vertical:"bottom", horizontal:"center"}} open={open} autoHideDuration={3000} onClose={handelCloseAlert}>
                     <Alert variant="filled" severity='error'>

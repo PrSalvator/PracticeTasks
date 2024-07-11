@@ -5,3 +5,17 @@
 .wrapper:hover{
     background-color: #e1f5fe;
 }
+
+.name{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.selected{
+    background-color: #e1f5fe;
+}
+
+.dragOver{
+    border-width: 4px;
+}

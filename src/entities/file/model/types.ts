@@ -4,6 +4,12 @@ export interface FileResponse{
 }
 
 export interface IFile{
+    id: string;
     name: string;
     filePath: string;
 } 
+
+export class File{
+    name = '';
+    filePath = '';
+}

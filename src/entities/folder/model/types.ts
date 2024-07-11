@@ -1,5 +1,4 @@
-
-import { ContainerChildrenTypes } from "../../../widgets/container";
+import { DataType } from "../../../shared/model/types";
 import { IFile } from "../../file";
 
 export interface INewFolder{
@@ -21,6 +20,14 @@ export interface ResponseFolder{
 export interface IFolderChildren{
     id: string;
     name: string;
-    type: ContainerChildrenTypes;
-    file?: IFile;
+    type: DataType;
+    file?: {
+        name: string;
+        filepath: string;
+    };
+}
+
+export class Folder implements IFolder{
+    id = '';
+    name = '';
 }

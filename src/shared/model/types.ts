@@ -1,4 +1,4 @@
-export type ChildrenType = 'folder' | 'file';
+export type DataType =  'folder' | 'file';
 
 export type ListeningRef = {
     openActions: () => void;

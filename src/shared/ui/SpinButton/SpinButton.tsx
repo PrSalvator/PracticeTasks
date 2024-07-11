@@ -1,18 +1,23 @@
-import { Box, Button, CircularProgress } from "@mui/material"
-import { ReactNode } from "react";
+import { Box, Button,  ButtonOwnProps,  CircularProgress } from "@mui/material"
+import { CommonProps } from "@mui/material/OverridableComponent";
+import React, { ReactNode } from "react";
 
-interface Props{
+interface Props extends CommonProps, React.ComponentPropsWithRef<'button'>{
     isLoading: boolean;
-    type?: "submit" | "reset" | "button" | undefined;
-    children: ReactNode;
+    variant: ButtonOwnProps["variant"];
 }
 
-export const SpinButton = ({isLoading, type, children}: Props) => {
+export const SpinButton = ({isLoading, children, onClick, variant, className, type}: Props) => {
+    function handleClick(e: React.MouseEvent<HTMLButtonElement>){
+        e.preventDefault();
+        if(onClick) onClick(e);
+    }
+
     return(
-    <Box sx={{position: 'relative'}} className="p-0">
-        <Button disabled={isLoading} sx={{width: '100%'}} type={type} className="mt-3" variant="contained">{children}</Button>
+    <Box sx={{position: 'relative'}} className={className}>
+        <Button type={type} onClick={onClick} disabled={isLoading} sx={{width: '100%'}} variant={variant}>{children}</Button>
         {isLoading && (
-            <CircularProgress color='success' size={24} sx={{position: 'absolute', top: '50%', left: '50%', marginTop: '-3px', marginLeft: '-12px'}}></CircularProgress>
+            <CircularProgress color='primary' size={24} sx={{position: 'absolute', top: '50%', left: '50%', marginTop: '-12px', marginLeft: '-12px'}}></CircularProgress>
         )}
     </Box>
     )
