@@ -6,7 +6,7 @@ import { USER } from "../../../../shared/constants/constants";
 
 export const useUser = () => {
     const { user, setUser } = useContext(AuthContext);
-    const { setItem } = useLocalStorage();
+    const { removeItem, setItem } = useLocalStorage();
 
     const addUser = (user: IUser) => {
         setUser(user);
@@ -15,7 +15,7 @@ export const useUser = () => {
 
     const removeUser = () => {
         setUser(null);
-        setItem(USER, "");
+        removeItem(USER);
     };
 
     return { user, addUser, removeUser, setUser };
