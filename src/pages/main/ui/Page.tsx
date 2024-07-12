@@ -3,7 +3,7 @@ import { Container } from "../../../widgets/container"
 import { ToolBar } from "../../../widgets/toolBar";
 import { GetFolder, IFolder, ResponseFolder } from "../../../entities/folder";
 import { IFile } from "../../../entities/file";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams} from "react-router-dom";
 
 export const Page = () => {
     const [folder, setFolder] = useState<ResponseFolder | undefined>(undefined);
@@ -28,7 +28,7 @@ export const Page = () => {
 
     return (
         <div className="row col-10 offset-1 col-xl-8 offset-xl-2 gy-3">
-            <ToolBar setFolder={setFolder} selectedItem={selectedValue} folder={folder}/>
+            <ToolBar setSelectedValue={setSelectedValue} setFolder={setFolder} selectedValue={selectedValue} folder={folder}/>
             <Container setFolder={setFolder} selectedValue={selectedValue} setSelectedValue={setSelectedValue} folder={folder}/>
         </div>
     )

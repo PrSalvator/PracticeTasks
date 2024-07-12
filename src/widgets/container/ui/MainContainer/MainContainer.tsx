@@ -2,7 +2,7 @@ import { Folder, IFolder, ResponseFolder, UpdateFolder } from "../../../../entit
 import { IFile, File } from "../../../../entities/file";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Alert, AlertColor, Snackbar } from "@mui/material";
+import { Alert, AlertColor, Skeleton, Snackbar } from "@mui/material";
 
 interface Props{
     folder?: ResponseFolder;
@@ -23,16 +23,16 @@ export const MainContainer = ({folder, setSelectedValue, selectedValue, setFolde
     const [alertSeverity, setAlertSeverity] = useState<AlertColor>('success')
 
     useEffect(() => {
+        const folders: IFolder[] = [];
+        const files: IFile[] = [];
         if(folder){
-            const folders: IFolder[] = [];
-            const files: IFile[] = [];
             folder.children.forEach(item => {
                 if(item.type === 'folder') folders.push({id: item.id, name: item.name});
                 if(item.type === 'file') files.push({id: item.id, name: item.file!.name, filePath: item.file!.filepath});
             })
-            setFolders(folders);
-            setFiles(files);
         }
+        setFolders(folders);
+        setFiles(files);
     }, [folder])
 
     function getParentFolder(): IFolder | undefined{
@@ -44,6 +44,7 @@ export const MainContainer = ({folder, setSelectedValue, selectedValue, setFolde
     }
 
     function handleDoubleClick(selectedFolder: IFolder){
+        setSelectedValue(undefined);
         navigate(`/${selectedFolder.id}?parentId=${folder?.id}`);
 
     }
@@ -88,34 +89,46 @@ export const MainContainer = ({folder, setSelectedValue, selectedValue, setFolde
             <Snackbar autoHideDuration={3000} open={openAlert} onClose={() => setOpenAlert(false)}>
                 <Alert onClose={() => setOpenAlert(false)} severity={alertSeverity} variant="filled">{alertMessage}</Alert>
             </Snackbar>
-            <h2 className="mb-3">{folder?.name}</h2>
+            {folder ? (
+                <h2 className="mb-3">{folder?.name}</h2>
+            ): <Skeleton className="mb-3" width={'80%'} height={40}/>}
             <h5>Folders</h5>
-            <div className="mb-3 row row-cols-auto g-2">
-                {parentFolder && (
-                    <Folder
-                    onDragOver={dragOverHandler} 
-                    onDrop={() => dropHandler(parentFolder)} 
-                    folder={parentFolder} onDoubleClick={() => navigate(-1)}/>
-                )}
-                {folders && (    
-                    folders.map((folder, index) => 
+            {folder ? (
+                <div className="mb-3 row row-cols-auto g-2">
+                    {parentFolder && (
                         <Folder
                         onDragOver={dragOverHandler} 
-                        onDoubleClick={() => handleDoubleClick(folder)} key={index}
-                        onClick={() => setSelectedValue(folder)} 
-                        isSelected={selectedValue?.id == folder.id} folder={folder}
-                        onDrop={() => dropHandler(folder)} onDragStart={() => dragStartHandler(folder)}/>
-                    )
-                )}
-            </div>
+                        onDrop={() => dropHandler(parentFolder)} 
+                        folder={parentFolder} onDoubleClick={() => navigate(-1)}/>
+                    )}
+                    {folders && (    
+                        folders.map((folder, index) => 
+                            <Folder
+                            onDragOver={dragOverHandler} 
+                            onDoubleClick={() => handleDoubleClick(folder)} key={index}
+                            onClick={() => setSelectedValue(folder)} 
+                            isSelected={selectedValue?.id == folder.id} folder={folder}
+                            onDrop={() => dropHandler(folder)} onDragStart={() => dragStartHandler(folder)}/>
+                        )
+                    )}
+                    {folders?.length === 0 && folder.name === "root" && (
+                        <p>There’s nothing here yet</p>
+                    )}
+                </div>
+            ): <Skeleton width={'50%'} height={100}/>}
             <h5>Files</h5>
-            <div className="mb-3 row row-cols-auto g-2">
-                {files && (
-                    files.map((file, index) =>
-                        <File onClick={() => setSelectedValue(file)} file={file} isSelected={selectedValue?.id == file.id} key={index}/>
-                    )
-                )}
-            </div>
+            {folder ? (
+                <div className="mb-3 row row-cols-auto g-2">
+                    {files && (
+                        files.map((file, index) =>
+                            <File onClick={() => setSelectedValue(file)} file={file} isSelected={selectedValue?.id == file.id} key={index}/>
+                        )
+                    )}
+                    {files?.length === 0 && (
+                        <p>There’s nothing here yet</p>
+                    )}
+                </div>
+            ): <Skeleton width={'50%'} height={100}/>}
         </div>
     )
 }

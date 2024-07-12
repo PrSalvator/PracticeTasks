@@ -6,16 +6,17 @@ import { CreateFolder, DeleteFolder, IFolder, ResponseFolder, UpdateFolder } fro
 import { DeleteFile, IFile, UploadFile } from "../../../../entities/file";import { DeleteWindow, NewFileWindow, NewFolderWindow } from "../../../../features/modalWindows";
 import { Dispatch, SetStateAction, useState } from "react";
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
-import { SnackbarProvider, VariantType, useSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import styles from './styles.module.css'
 
 interface Props{
     setFolder: Dispatch<SetStateAction<ResponseFolder | undefined>>;
     folder?: ResponseFolder;
-    selectedItem?: IFolder | IFile;
+    selectedValue?: IFolder | IFile;
+    setSelectedValue: React.Dispatch<React.SetStateAction<IFolder | IFile | undefined>>; 
 }
 
-export const ToolBar = ({folder, selectedItem, setFolder}: Props) => {
+export const ToolBar = ({folder, selectedValue, setFolder, setSelectedValue}: Props) => {
     const [newFolderWindowOpen, setNewFolderWindowOpen] = useState(false);
     const [updateFolderWindowOpen, setUpdateFolderWindowOpen] = useState(false);
     const [deleteWindowOpen, setDeleteWindowOpen] = useState(false);
@@ -31,7 +32,7 @@ export const ToolBar = ({folder, selectedItem, setFolder}: Props) => {
     function handleUpdateFolder(folderName: string){
         setIsLoading(true);
         
-        const selectedFolder = selectedItem as IFolder
+        const selectedFolder = selectedValue as IFolder
         selectedFolder.name = folderName;
 
         UpdateFolder(selectedFolder, folder?.id).then((response) => {
@@ -76,8 +77,8 @@ export const ToolBar = ({folder, selectedItem, setFolder}: Props) => {
 
     function handleDeleteSelectedItem(){
         setIsLoading(true);
-        if((selectedItem as IFile).filePath){
-            const selectedFile = (selectedItem as IFile);
+        if((selectedValue as IFile).filePath){
+            const selectedFile = (selectedValue as IFile);
 
             DeleteFile(selectedFile.id).then(() => {
                 setFolder((prev) => {
@@ -85,7 +86,7 @@ export const ToolBar = ({folder, selectedItem, setFolder}: Props) => {
                     if(index !== undefined) prev?.children.splice(index, 1);
                     return {...prev!};
                 });
-
+                setSelectedValue(undefined);
                 setDeleteWindowOpen(false);
                 showAlert("Successfully deleted", "success");
             }, () => {
@@ -93,14 +94,14 @@ export const ToolBar = ({folder, selectedItem, setFolder}: Props) => {
             }).finally(() => setIsLoading(false))
         }
         else {
-            const selectedFolder = (selectedItem as IFolder);
+            const selectedFolder = (selectedValue as IFolder);
             DeleteFolder(selectedFolder.id).then(() => {        
                 setFolder((prev) => {
                     const index = prev?.children.indexOf(prev?.children.find(x => x.id === selectedFolder.id)!);
                     if(index !== undefined) prev?.children.splice(index, 1);
                     return {...prev!};
                 });
-
+                setSelectedValue(undefined);
                 setDeleteWindowOpen(false);
                 showAlert("Successfully deleted", "success");
             }, () => {
@@ -122,7 +123,7 @@ export const ToolBar = ({folder, selectedItem, setFolder}: Props) => {
                   ...prev!,
                   children: [
                     ...prev!.children,
-                    {...data}
+                    {id: data.id, name: '', type: "file", file: data.file}
                   ]
                 };
             });
@@ -139,8 +140,8 @@ export const ToolBar = ({folder, selectedItem, setFolder}: Props) => {
             </Snackbar>
 
             <NewFolderWindow positiveButtonLabel="create" header="New folder" defaultValue='Untitled' isLoading={isloading} handleCreate={(folderName) => handleCreateNewFolder(folderName)} handleClose={() => setNewFolderWindowOpen(false)} open={newFolderWindowOpen}/>
-            <NewFolderWindow positiveButtonLabel="rename" header="Rename folder" defaultValue={selectedItem ? (selectedItem as IFolder).name : ''} isLoading={isloading} handleCreate={(folderName) => handleUpdateFolder(folderName)} handleClose={() => setUpdateFolderWindowOpen(false)} open={updateFolderWindowOpen}/>
-            <DeleteWindow open={deleteWindowOpen} name={selectedItem? selectedItem.name : ''} handleClose={() => setDeleteWindowOpen(false)} isLoading={false} handleDelete={handleDeleteSelectedItem}/>
+            <NewFolderWindow positiveButtonLabel="rename" header="Rename folder" defaultValue={selectedValue ? (selectedValue as IFolder).name : ''} isLoading={isloading} handleCreate={(folderName) => handleUpdateFolder(folderName)} handleClose={() => setUpdateFolderWindowOpen(false)} open={updateFolderWindowOpen}/>
+            <DeleteWindow open={deleteWindowOpen} name={selectedValue? selectedValue.name : ''} handleClose={() => setDeleteWindowOpen(false)} isLoading={false} handleDelete={handleDeleteSelectedItem}/>
             <NewFileWindow handleUploadFiles={handleUploadFiles} open={loadFilesWindowOpen} handleClose={() => setLoadFilesWindowOpen(false)} isLoading={isloading}/>
 
             <Tooltip title="Create folder">
@@ -148,18 +149,13 @@ export const ToolBar = ({folder, selectedItem, setFolder}: Props) => {
                     <CreateNewFolderIcon sx={{fontSize: 32}}/>
                 </IconButton>
             </Tooltip>
-            <Tooltip title="Move folder">
-                <IconButton color="primary" disabled={selectedItem ? !(selectedItem as IFolder).id : true}>
-                    <DriveFileMove sx={{fontSize: 32}}/>
-                </IconButton>
-            </Tooltip>
             <Tooltip title="Delete">
-                <IconButton onClick={() => setDeleteWindowOpen(true)} color="primary" disabled={!selectedItem}>
+                <IconButton onClick={() => setDeleteWindowOpen(true)} color="primary" disabled={!selectedValue}>
                     <Delete sx={{fontSize: 32}}/>
                 </IconButton>
             </Tooltip>
             <Tooltip title="Rename folder">
-                <IconButton onClick={() => setUpdateFolderWindowOpen(true)} color="primary" disabled={selectedItem ? !(selectedItem as IFolder).id : true}>
+                <IconButton onClick={() => setUpdateFolderWindowOpen(true)} color="primary" disabled={selectedValue ? !!(selectedValue as IFile).filePath : true}>
                     <DriveFileRenameOutlineIcon sx={{fontSize: 32}}/>
                 </IconButton>
             </Tooltip>
@@ -168,7 +164,7 @@ export const ToolBar = ({folder, selectedItem, setFolder}: Props) => {
                     <UploadFileIcon sx={{fontSize: 32}}/>
                 </IconButton>
             </Tooltip>
-            <h3 className={`d-inline-block align-middle ms-4 mb-0 ${styles.name}`}>{selectedItem?.name}</h3>
+            <h3 className={`d-inline-block align-middle ms-4 mb-0 ${styles.name}`}>{selectedValue?.name}</h3>
         </div>
     )
 }

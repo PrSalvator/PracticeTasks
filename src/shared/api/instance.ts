@@ -14,3 +14,14 @@ instance.interceptors.request.use(function(config){
 }, function(error){
     return Promise.reject(error);
 })
+
+instance.interceptors.response.use(function(response){
+    return response;
+}, function(error){
+    const {response} = error;
+    if(response.status === 401){
+        localStorage.removeItem(USER);
+        window.location.href = "/login";
+    }
+    return error;
+})
